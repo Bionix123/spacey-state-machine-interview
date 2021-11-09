@@ -21,6 +21,8 @@ class JobOpeningController extends Controller
      * 2.State -> roleVisibility as an array (which roles can see this state)
      * All that can be represented in a nice UI and can be easily configured by the client/app admin without the need of a software developer.
      */
+
+    //Declared as public so I can have the "display-workflow" route
     public function workflow($json = true){
 
         $states = [];
@@ -117,6 +119,19 @@ class JobOpeningController extends Controller
         return $workflow;
     }
 
+    //Display available actions
+    public function showActions(){
+        $workflow = $this->workflow(false);
+        return response()->json(['actions' => $workflow->actions]);
+    }
+
+    //Display available states
+    public function showStates(){
+        $workflow = $this->workflow(false);
+        return response()->json(['states' => $workflow->states]);
+    }
+
+    //Display all Job Openings in every state
     public function indexClient()
     {
         $jobOpenings = JobOpening::all();
@@ -126,6 +141,7 @@ class JobOpeningController extends Controller
         return response()->json(['message' => "These are the current job openings", 'job_openings' => $jobOpenings]);
     }
 
+    //Display Job Openings in every state except draft or canceled (can be done dynamically based on workflow)
     public function indexProvider()
     {
         $jobOpenings = JobOpening::where([['state','!=', 'draft'],['state', '!=', 'canceled']])->get();
@@ -135,6 +151,7 @@ class JobOpeningController extends Controller
         return response()->json(['message' => "These are the current job openings", 'job_openings' => $jobOpenings]);
     }
 
+    //Create Job Opening
     public function create(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -158,6 +175,7 @@ class JobOpeningController extends Controller
         ]);
     }
 
+    //Make Action method -> checks if action exists, role has permission and job opening is in required state; Performs action if everything checks.
     public function makeAction(Request $request){
         $validator = Validator::make($request->all(), [
             'action' => 'required|string',

@@ -71,11 +71,6 @@ class AuthController extends Controller
         return $this->createNewToken(auth()->refresh());
     }
 
-    public function userProfile()
-    {
-        return response()->json(auth()->user());
-    }
-
     protected function createNewToken($token)
     {
         return response()->json([
